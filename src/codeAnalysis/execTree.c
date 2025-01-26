@@ -129,28 +129,28 @@ int treeNodeRemoveContent(ExecTree *treeNode) {
 
 int treeRemoveNodeAndChilds(ExecTree *treeNode) {
 	if (treeNode == NULL) { return 1; }
-	int exitCode = 0;
+	printf("\e[38;5;34mSTART\e[0m\n");
 	if (treeNode->childCount > 0) {
 		for (int i = 0; i < treeNode->childCount; i++) {
 			// TODO: add logic for ignoring if deeper in tree root is passed
 			if (treeNode->nextLevel[i] != NULL) {
-				exitCode = treeRemoveNodeAndChilds(treeNode->nextLevel[i]);
-				if (exitCode != 0) {
-					return exitCode;
-				}
-			}
-			if (treeNode->content != NULL) {
-				free(treeNode->content);
-				treeNode->content = NULL;
+				treeRemoveNodeAndChilds(treeNode->nextLevel[i]);
+				treeNode->nextLevel[i] = NULL;	
 			}
 		}
 	}
-	free(treeNode->nextLevel);
-	treeNode->nextLevel = NULL;
+	if (treeNode->content != NULL) {
+		free(treeNode->content);
+		treeNode->content = NULL;
+	}
+	if (treeNode->nextLevel != NULL) {
+		free(treeNode->nextLevel);
+		treeNode->nextLevel = NULL;
+	}
 	free(treeNode);
 	treeNode = NULL;
-	printf("\t\e[38;5;3msegAfter\e[0m\n");
-	return exitCode;
+	printf("\e[38;5;33mEND\e[0m\n");
+	return 0;
 }
 
 char *treeGetContentPointer(ExecTree *treeNode) {

@@ -12,11 +12,9 @@ ExecTree *makeExecTree(FILE *file, int bufferSize) {
 	// TODO: try to use array index instea of pointer at interface return
 	
 	treeAppendLevel(execTree);
-	treeAppendLevel(execTree->nextLevel[0]);
-
 	treeAppendLevelWith(execTree->nextLevel[0], execTree);
 
-	// treeRemoveNodeAndChilds(execTree);
+	treeRemoveNodeAndChilds(execTree);
 	free(buffer);
 	return execTree;
 }
