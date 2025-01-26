@@ -4,7 +4,7 @@
 #include <stdbool.h>
 
 #include "./error/interface.h"
-#include "./codeAnalysis/interface.h"
+#include "./codeParsing/interface.h"
 
 #define RED "\e[38;5;1m"
 #define ORG "\e[38;5;9m"

@@ -11,9 +11,9 @@ configure_file(
 add_executable(alloy
 	src/main.c
 	src/error/messages.c
-	src/codeAnalysis/execTree.c
-	src/codeAnalysis/parser.c
-	src/codeAnalysis/lexer.c
+	src/codeParsing/execTree.c
+	src/codeParsing/parser.c
+	src/codeParsing/lexer.c
 )
 
 target_compile_options(alloy PUBLIC -static)
