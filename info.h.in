@@ -1,0 +1,4 @@
+#pragma once
+
+#define NAME "@PROJECT_NAME@"
+#define VERSION "@Alloy_VERSION@"
