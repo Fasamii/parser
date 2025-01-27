@@ -1,7 +1,4 @@
-=hello (  \n
-my name is ( =
-fasamii ( =
-	age : 16, smart : true :3
-	)
-		)
-)
+smt=else
+else==smt
+idk = huh == guh
+= is == equal === trata

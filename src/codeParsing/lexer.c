@@ -101,8 +101,13 @@ int getNextToken(FILE *file, Buffer *buffer, Token *token) {
 		}
 
 		if (buffer->data[buffer->index] == '\n') {
-			buffer->index++;
-			continue;
+			if (content.index == 0) {
+				buffer->index++;
+				continue;
+			} else {
+				writeToToken(token, _IDENTIFIER, content.size, content.data);
+				return 0;
+			}
 		}
 
 		switch (buffer->data[buffer->index]) {
@@ -119,28 +124,22 @@ int getNextToken(FILE *file, Buffer *buffer, Token *token) {
 				break;
 			case '=':
 				if (content.index == 0) {
-					if (buffer->index >= (buffer->size - 2)) {
+					buffer->index++;
+					if (buffer->index >= (buffer->size - 1)) {
 						buffer->data = (char*) malloc(buffer->size * sizeof(char));
 						if (readFileToBuffer(file, buffer) == 10) {
 							writeToToken(token, _OPERATOR, 1, "=");
 							return 0;
 						}
-						if (buffer->data[buffer->index] == '=') {
-							writeToToken(token, _OPERATOR, 2, "==");
-							buffer->index++;
-						} else {
-							writeToToken(token, _OPERATOR, 1, "=");
-						}
+					}
+					if (buffer->data[buffer->index] == '=') {
+						writeToToken(token, _OPERATOR, 2, "==");
+						buffer->index++;
+						return 0;
 					} else {
-						if (buffer->data[buffer->index + 1] == '=') {
-							writeToToken(token, _OPERATOR, 2, "==");
-							buffer->index++;
-						} else {
-							writeToToken(token, _OPERATOR, 1, "=");
-						}
-					};
-					buffer->index++;
-					return 0;
+						writeToToken(token, _OPERATOR, 1, "=");
+						return 0;
+					}
 				} else {
 					writeToToken(token, _IDENTIFIER, content.index, content.data);
 					return 0;
