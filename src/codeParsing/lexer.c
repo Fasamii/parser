@@ -40,10 +40,20 @@ int readFileToBuffer(FILE *file, Buffer *buffer) {
 	return 0;
 }
 
-int readBufferToBuffer(Buffer *bufferFrom, Buffer *bufferTo) {
-	printf("\e[38;5;1mNOT_IMPLEMENTED_YET\e[0m\n");
-	// TODO: make this foo ...
-	return 1;
+int copyBufferDataToBuffer(Buffer *bufferFrom, Buffer *bufferTo) {
+	int max = 0;
+	if (bufferFrom->index > bufferTo->index) {
+		max = bufferFrom->index;
+	} else {
+		max = bufferTo->index;
+	}
+	for (int i = 0; i < max; i++) {
+		if (i > bufferTo->size) {
+			return -1;
+		}
+		bufferTo->data[i] = bufferFrom->data[i];
+	}
+	return 0;
 }
 
 int getNextToken(FILE *file, Buffer *buffer, Token *token) {
@@ -97,8 +107,38 @@ int getNextToken(FILE *file, Buffer *buffer, Token *token) {
 
 		switch (buffer->data[buffer->index]) {
 			case ':':
+				printf("helre\n");
 				if (content.index == 0) {
 					writeToToken(token, _OPERATOR, 1, ":");
+					buffer->index++;
+					return 0;
+				} else {
+					writeToToken(token, _IDENTIFIER, content.index, content.data);
+					return 0;
+				}
+				break;
+			case '=':
+				if (content.index == 0) {
+					if (buffer->index >= (buffer->size - 2)) {
+						buffer->data = (char*) malloc(buffer->size * sizeof(char));
+						if (readFileToBuffer(file, buffer) == 10) {
+							writeToToken(token, _OPERATOR, 1, "=");
+							return 0;
+						}
+						if (buffer->data[buffer->index] == '=') {
+							writeToToken(token, _OPERATOR, 2, "==");
+							buffer->index++;
+						} else {
+							writeToToken(token, _OPERATOR, 1, "=");
+						}
+					} else {
+						if (buffer->data[buffer->index + 1] == '=') {
+							writeToToken(token, _OPERATOR, 2, "==");
+							buffer->index++;
+						} else {
+							writeToToken(token, _OPERATOR, 1, "=");
+						}
+					};
 					buffer->index++;
 					return 0;
 				} else {

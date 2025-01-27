@@ -13,8 +13,8 @@ if [ "$?" -ne 0 ]; then
 fi
 echo -en '\e[38;5;5m|==[BUILD_END]===========================|\e[0m\n'
 
-if [ "$#" -eq 1 ]; then 
-	target=$1
+if [ "$#" -gt 1 ]; then 
+	target=$2
 else
 	target=1
 fi
@@ -42,7 +42,11 @@ trap cleanup SIGINT
 while [ "$iteration" -lt "$target" ];
 do
 	echo -en '\e[38;5;33m|==['"$(($iteration + 1))"']===================================|\e[0m\n'
-	(./build/alloy ./examples/ehe.al)
+	if [ "$#" -gt 1 ] || [ "$#" -eq 1 ]; then
+		./build/alloy $1
+	else
+		(./build/alloy ./examples/ehe.al)
+	fi
 	if [ "$?" -ne 0 ]; then
 		errorCount=$((errorCount + 1))
 	fi
