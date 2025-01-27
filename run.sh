@@ -22,6 +22,23 @@ fi
 iteration=0
 errorCount=0
 
+cleanup() {
+	echo -en '\e[38;5;32m|==[END_FORCED]==========================|\e[0m\n'
+	if [ "$errorCount" -eq 0 ]; then
+		echo -en '\e[38;5;2m'
+	else 
+		echo -en '\e[38;5;1m'
+	fi
+
+	echo -en 'ErrorCount:'"$errorCount"'\e[0m\n'
+	if [ "$errorCount" -gt 0 ]; then
+		exit 1
+	else
+		exit 0
+	fi
+}
+trap cleanup SIGINT
+
 while [ "$iteration" -lt "$target" ];
 do
 	echo -en '\e[38;5;33m|==['"$(($iteration + 1))"']===================================|\e[0m\n'

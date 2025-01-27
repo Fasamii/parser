@@ -10,16 +10,16 @@ ExecTree *parseSourceFile(FILE *file, int bufferSize) {
 	Buffer *buffer = (Buffer*) malloc(sizeof(Buffer));
 	buffer->size = bufferSize;
     	buffer->index = 0;
+	buffer->data = NULL;
 
 	Token *token = (Token*) malloc(sizeof(Token));
 	while (1) {
-	if (getNextToken(file, buffer, token) != 0) { break; }
-		if (token->content) {
-			printf("├> %s\n", token->content);
+		if (getNextToken(file, buffer, token) != 0) { break; }
+		if (token->type == _EOF) {
+			printf("end of file\n");
+			break; 
 		}
-	}
-	if (token->type == _EOF) {
-		printf("├> end of file\n");
+		printf("=>\e[38;5;44m%s\e[0m\n", token->content);
 	}
 
 	treeRemoveNodeAndChilds(execTree);

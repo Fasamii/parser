@@ -4,24 +4,46 @@
 #include "./interface.h"
 #include "./lexer.h"
 
-int writeToBufferFromFile(char *data, int bufferSize, FILE *file) {
-	if (data == NULL) { return 1; }
-	if (bufferSize < 1) { return 2; }
-	if (file == NULL) { return 3; }
-	
-	//TODO: change this awful thing
-	for (int i = 0; i < bufferSize; i++) {
-		data[i] = '\0';
+int printChar(Buffer *buffer) {
+	if (buffer->data[buffer->index] != '\0') {
+		if ((buffer->data[buffer->index]) == '\n') {
+			printf("'\e[38;5;32m\e[0m'");
+		} else {
+			if (buffer->data[buffer->index] == '\t') {
+				printf("'\e[38;5;32m➔\e[0m'");
+			} else {
+				printf("'\e[38;5;23m%c\e[0m'", buffer->data[buffer->index]);
+			}
+		}
 	}
-
-	if (!fgets(data, bufferSize, file)) { return 5; } 
-
-	// printf("\n");
-	// for (int i = 0; i < bufferSize; i++) {
-		// printf("\e[38;5;33m%c\e[0m", data[i]);
-	// }
-	// printf("\n");
 	return 0;
+}
+
+int writeToToken(Token *token, int type, int size, char *content) {
+	if (token == NULL) { return 1; }
+	if (content == NULL) { return 3; }
+	if (size == 0) { while (content[size] != '\0') { size++; }}
+	token->size = size;
+	token->content = content;
+	token->type = type;
+	return 0;
+}
+
+int readFileToBuffer(FILE *file, Buffer *buffer) {
+	if (file == NULL) { return 1; }
+	if (buffer == NULL) { return 2; }
+	if (buffer->size < 2) { return 3; }
+	int readCount = fread(buffer->data, sizeof(char), (buffer->size - 1), file);
+	buffer->data[readCount] = '\0';
+	buffer->index = 0;
+	if (readCount == 0) { return 10; } 
+	return 0;
+}
+
+int readBufferToBuffer(Buffer *bufferFrom, Buffer *bufferTo) {
+	printf("\e[38;5;1mNOT_IMPLEMENTED_YET\e[0m\n");
+	// TODO: make this foo ...
+	return 1;
 }
 
 int getNextToken(FILE *file, Buffer *buffer, Token *token) {
@@ -29,53 +51,68 @@ int getNextToken(FILE *file, Buffer *buffer, Token *token) {
 	if (buffer == NULL) { return 2; }
 	if (token == NULL) { return 3; }
 	if (buffer->size == 0) { return 5; }
-
 	token->content = NULL;
 	token->size = 0;
 	token->type = 0;
 
-	if (buffer->data == NULL) {
-		buffer->data = (char*) malloc(buffer->size * sizeof(char));
-		if (buffer->data == NULL) { return 4; }
-		buffer->index = 0;
-		if (writeToBufferFromFile(buffer->data, buffer->size, file) != 0) {
-			token->content = (char*) malloc(sizeof(char));
-			token->content[0] = '\0';
-			token->type = _EOF;
-			token->size = 1;
-			return 10;
-		}
-	}
-
-	if ((buffer->index - 1) >= buffer->size || buffer->data[buffer->index] == '\n') {
-		printf("<|next line please|>\n");
-		buffer->index = 0;
-		if (writeToBufferFromFile(buffer->data, buffer->size, file)) {
-			token->content = (char*) malloc(sizeof(char));
-			token->content[0] = '\0';
-			token->type = _EOF;
-			token->size = 1;
-			return 10;
-		}
-	}
-	// lexer goes brrrr stuff below //
-
-	printf("\e[38;5;23m%c \e[0m", buffer->data[buffer->index]);
-	switch (buffer->data[buffer->index]) {
-		case '=':
-			if (buffer->index + 1 < buffer->size) {
-				if (buffer->data[buffer->index + 1] == '=') {
-					printf("\e[38;5;5m= =\e[0m\n");
-					buffer->index++;
-					// ==
-				} else {
-					printf("\e[38;5;5m=\e[0m\n");
-					// = 
-				}
-			}
-			break;
-	}
+	Buffer content;
+	content.size = buffer->size;
+	content.data = (char*) malloc(content.size * sizeof(char));
+	content.index = 0;
 	
+	while (1) {
+		printf("entryindex: content-%i buffer-%i\n", content.index, buffer->index);
+		
+		if (buffer->data == NULL 
+		|| (buffer->index - 1) >= buffer->size 
+		|| buffer->data[buffer->index] == '\0') {
+			if (buffer->data == NULL) {
+				buffer->data = (char*) malloc(buffer->size * sizeof(char));
+				if (buffer->data == NULL) { return 4; }
+			}
+			if (readFileToBuffer(file, buffer) == 10) {
+				writeToToken(token, _EOF, 0, "\0");
+				return 0;
+			}
+		}
+
+		if ((content.index - 1) >= content.size) {
+			content.size = content.size * 2;
+			content.data = (char*) realloc(content.data, content.size * sizeof(char));
+
+		}
+		if (buffer->data[buffer->index] == ' ') { 
+			if (content.index == 0) {
+				buffer->index++;
+				continue; 
+			}
+			writeToToken(token, _IDENTIFIER, content.index, content.data);
+			break;
+		}
+
+		if (buffer->data[buffer->index] == '\n') {
+			buffer->index++;
+			continue;
+		}
+
+		switch (buffer->data[buffer->index]) {
+			case ':':
+				if (content.index == 0) {
+					writeToToken(token, _OPERATOR, 1, ":");
+					buffer->index++;
+					return 0;
+				} else {
+					writeToToken(token, _IDENTIFIER, content.index, content.data);
+					return 0;
+				}
+				break;
+			default:
+				content.data[content.index] = buffer->data[buffer->index];
+				content.index++;
+				buffer->index++;
+		}
+
+	}
 	buffer->index++;
 	return 0;
 }
