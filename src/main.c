@@ -29,7 +29,7 @@ int main(int argc, char *argv[]) {
 		goto EXIT;
 	}
 
-	ExecTree *execTree = makeExecTree(file, 64);
+	ExecTree *execTree = parseSourceFile(file, 32);
 	if (execTree == NULL) {
 		exitMsg = logError(6);
 		goto EXIT_FILE;
