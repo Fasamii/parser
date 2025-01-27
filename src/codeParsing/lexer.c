@@ -17,38 +17,41 @@ int writeToBufferFromFile(char *data, int bufferSize, FILE *file) {
 	return 0;
 }
 
-Token *getNextToken(FILE *file, Buffer *buffer) {
-	if (file == NULL) { return NULL; }
-	if (buffer == NULL) { return NULL; }
-	if (buffer->size == 0) { return NULL; }
+int getNextToken(FILE *file, Buffer *buffer, Token *token) {
+	if (file == NULL) { return 1; }
+	if (buffer == NULL) { return 2; }
+	if (token == NULL) { return 3; }
+	if (buffer->size == 0) { return 5; }
 
-	Token *token = (Token*) malloc(sizeof(Token));
-	if (token == NULL) { return NULL; }
 	token->content = NULL;
 	token->size = 0;
 	token->type = 0;
 
 	if (buffer->data == NULL) {
 		buffer->data = (char*) malloc(buffer->size * sizeof(char));
-		if (buffer->data == NULL) { return NULL; }
-		if (!writeToBufferFromFile(buffer->data, buffer->size, file)) {
+		if (buffer->data == NULL) { return 4; }
+		if (writeToBufferFromFile(buffer->data, buffer->size, file) != 0) {
 			token->content = (char*) malloc(sizeof(char));
 			token->content[0] = '\0';
 			token->type = _EOF;
 			token->size = 1;
-			return token;
+			return 10;
 		}
 	}
 
-	if ((buffer->index - 1) >= buffer->size) {
-		if (!writeToBufferFromFile(buffer->data, buffer->size, file)) {
+	if ((buffer->index - 1) >= buffer->size || buffer->data[buffer->index] == '\n') {
+		printf("│ next line please\n");
+		if (writeToBufferFromFile(buffer->data, buffer->size, file)) {
 			token->content = (char*) malloc(sizeof(char));
 			token->content[0] = '\0';
 			token->type = _EOF;
 			token->size = 1;
-			return token;
+			return 10;
 		}
 	}
+	// parser lexer goes brrrr stuff below //
+
 	
-	return NULL;
+	buffer->index++;
+	return 0;
 }

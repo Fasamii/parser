@@ -7,4 +7,4 @@ typedef struct Buffer {
 	int size;
 } Buffer;
 
-Token *getNextToken(FILE *file, Buffer *buffer);
+int getNextToken(FILE *file, Buffer *buffer, Token *token);

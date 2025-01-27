@@ -11,11 +11,12 @@ ExecTree *parseSourceFile(FILE *file, int bufferSize) {
 	buffer->size = bufferSize;
     	buffer->index = 0;
 
-	Token *tok = getNextToken(file, buffer);
-	printf("type:%i/%i\n", tok->type, _EOF);
-	while (tok->type != _EOF && tok != NULL) {
-		if (tok->content) {
-			printf("┊ %s", tok->content);
+	printf("┊\n");
+	Token *token = (Token*) malloc(sizeof(Token));
+	while (1) {
+	if (getNextToken(file, buffer, token) != 0) { break; }
+		if (token->content) {
+			printf("├> %s\n", token->content);
 		}
 	}
 
