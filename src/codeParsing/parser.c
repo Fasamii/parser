@@ -11,13 +11,15 @@ ExecTree *parseSourceFile(FILE *file, int bufferSize) {
 	buffer->size = bufferSize;
     	buffer->index = 0;
 
-	printf("┊\n");
 	Token *token = (Token*) malloc(sizeof(Token));
 	while (1) {
 	if (getNextToken(file, buffer, token) != 0) { break; }
 		if (token->content) {
 			printf("├> %s\n", token->content);
 		}
+	}
+	if (token->type == _EOF) {
+		printf("├> end of file\n");
 	}
 
 	treeRemoveNodeAndChilds(execTree);

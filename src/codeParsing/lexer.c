@@ -5,15 +5,22 @@
 #include "./lexer.h"
 
 int writeToBufferFromFile(char *data, int bufferSize, FILE *file) {
+	if (data == NULL) { return 1; }
 	if (bufferSize < 1) { return 2; }
 	if (file == NULL) { return 3; }
-	if (data == NULL) {
-		data = (char*) malloc(bufferSize * sizeof(char));
-		if (data == NULL) { return 4; }
+	
+	//TODO: change this awful thing
+	for (int i = 0; i < bufferSize; i++) {
+		data[i] = '\0';
 	}
-	if (!fgets(data, bufferSize, file)) {
-		return 5;
+
+	if (!fgets(data, bufferSize, file)) { return 5; } 
+
+	printf("\n");
+	for (int i = 0; i < bufferSize; i++) {
+		printf("\e[38;5;33m%c\e[0m", data[i]);
 	}
+	printf("\n");
 	return 0;
 }
 
@@ -40,7 +47,7 @@ int getNextToken(FILE *file, Buffer *buffer, Token *token) {
 	}
 
 	if ((buffer->index - 1) >= buffer->size || buffer->data[buffer->index] == '\n') {
-		printf("│ next line please\n");
+		printf("<|next line please|>\n");
 		if (writeToBufferFromFile(buffer->data, buffer->size, file)) {
 			token->content = (char*) malloc(sizeof(char));
 			token->content[0] = '\0';
