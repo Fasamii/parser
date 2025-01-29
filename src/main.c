@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
-#include "./error/interface.h"
+#include "./messages/interface.h"
 #include "./codeParsing/interface.h"
 
 #define RED "\e[38;5;1m"
@@ -17,21 +17,29 @@ int main(int argc, char *argv[]) {
 	printf(VIO"╭NAME:"CLS""NAME"\n");
 	printf(VIO"╰VERSION:"CLS""VERSION"\n");
 
-	int exitMsg = 0;
-	// checking cli arguments //
-	if (argc < 2) { exitMsg = logError(1); goto EXIT; }
-	if (argc > 2) { exitMsg = logError(2); goto EXIT; }
+	if (argc < 2) { logMessage(13, "11", 
+			"ERROR : not enough cli arguments",
+			"you should provide path to source file");
+		goto EXIT;
+	}
+	if (argc > 2) { logMessage(13, "11", 
+			"ERROR : to many cli arguments", 
+			"you should only provide path to source file"); 
+		goto EXIT;
+	}
 	
 	// opening file //
 	FILE *file = fopen(argv[1], "r");
 	if (file == NULL) {
-		exitMsg = logError(3);
+		logMessage(13, "12",
+				"ERROR : cannot open file",
+				"check path to file",
+				"check if file even exist");
 		goto EXIT;
 	}
 
-	ExecTree *execTree = parseSourceFile(file, 2);
-	if (execTree == NULL) {
-		exitMsg = logError(6);
+	ExecTree *execTree = (ExecTree*) malloc(sizeof(ExecTree));
+	if(parseSourceFile(file, execTree, 3) != 0) {
 		goto EXIT_FILE;
 	}
 
@@ -40,5 +48,5 @@ int main(int argc, char *argv[]) {
 	fclose(file);
 	EXIT:
 	printf("╯\n");
-	return exitMsg;
+	return 0;
 }

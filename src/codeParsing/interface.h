@@ -23,5 +23,5 @@ typedef struct ExecTree {
 	char *content;
 } ExecTree;
 
-ExecTree *parseSourceFile(FILE *file, int bufferSize);
+int parseSourceFile(FILE *file, ExecTree *execTree, int bufferSize);
 int treeGetContent(ExecTree *treeNode, char *toContentPointer);

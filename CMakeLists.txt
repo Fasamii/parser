@@ -10,7 +10,7 @@ configure_file(
 
 add_executable(alloy
 	src/main.c
-	src/error/messages.c
+	src/messages/loging.c
 	src/codeParsing/execTree.c
 	src/codeParsing/parser.c
 	src/codeParsing/lexer.c

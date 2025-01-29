@@ -4,27 +4,18 @@
 #include "./interface.h"
 #include "./lexer.h"
 
-int printChar(Buffer *buffer) {
-	if (buffer->data[buffer->index] != '\0') {
-		if ((buffer->data[buffer->index]) == '\n') {
-			printf("'\e[38;5;32m\e[0m'");
-		} else {
-			if (buffer->data[buffer->index] == '\t') {
-				printf("'\e[38;5;32m➔\e[0m'");
-			} else {
-				printf("'\e[38;5;23m%c\e[0m'", buffer->data[buffer->index]);
-			}
-		}
-	}
-	return 0;
-}
-
 int writeToToken(Token *token, int type, int size, char *content) {
 	if (token == NULL) { return 1; }
-	if (content == NULL) { return 3; }
+	if (content == NULL) { return 4; }
+
 	if (size == 0) { while (content[size] != '\0') { size++; }}
 	token->size = size;
-	token->content = content;
+
+	token->content = (char*) malloc((size + 1) * sizeof(char));
+	if (token->content == NULL) { return 21; }
+
+	for (int i = 0; i < size; i++) { token->content[i] = content[i]; }
+	token->content[size] = '\0';
 	token->type = type;
 	return 0;
 }
@@ -32,27 +23,11 @@ int writeToToken(Token *token, int type, int size, char *content) {
 int readFileToBuffer(FILE *file, Buffer *buffer) {
 	if (file == NULL) { return 1; }
 	if (buffer == NULL) { return 2; }
-	if (buffer->size < 2) { return 3; }
+	if (buffer->size < 2) { return 11; }
 	int readCount = fread(buffer->data, sizeof(char), (buffer->size - 1), file);
 	buffer->data[readCount] = '\0';
 	buffer->index = 0;
-	if (readCount == 0) { return 10; } 
-	return 0;
-}
-
-int copyBufferDataToBuffer(Buffer *bufferFrom, Buffer *bufferTo) {
-	int max = 0;
-	if (bufferFrom->index > bufferTo->index) {
-		max = bufferFrom->index;
-	} else {
-		max = bufferTo->index;
-	}
-	for (int i = 0; i < max; i++) {
-		if (i > bufferTo->size) {
-			return -1;
-		}
-		bufferTo->data[i] = bufferFrom->data[i];
-	}
+	if (readCount == 0) { return -10; } 
 	return 0;
 }
 
@@ -60,7 +35,8 @@ int getNextToken(FILE *file, Buffer *buffer, Token *token) {
 	if (file == NULL) { return 1; }
 	if (buffer == NULL) { return 2; }
 	if (token == NULL) { return 3; }
-	if (buffer->size == 0) { return 5; }
+	if (buffer->size < 2) { return 11; }
+
 	token->content = NULL;
 	token->size = 0;
 	token->type = 0;
@@ -71,7 +47,7 @@ int getNextToken(FILE *file, Buffer *buffer, Token *token) {
 	content.index = 0;
 	
 	while (1) {
-		printf("entryindex: content-%i buffer-%i\n", content.index, buffer->index);
+		//printf("entryindex: content-%i buffer-%i\n", content.index, buffer->index);
 		
 		if (buffer->data == NULL 
 		|| (buffer->index - 1) >= buffer->size 
@@ -80,8 +56,8 @@ int getNextToken(FILE *file, Buffer *buffer, Token *token) {
 				buffer->data = (char*) malloc(buffer->size * sizeof(char));
 				if (buffer->data == NULL) { return 4; }
 			}
-			if (readFileToBuffer(file, buffer) == 10) {
-				writeToToken(token, _EOF, 0, "\0");
+			if (readFileToBuffer(file, buffer) == -10) {
+				writeToToken(token, _EOF, 1, "\0");
 				return 0;
 			}
 		}
@@ -112,7 +88,6 @@ int getNextToken(FILE *file, Buffer *buffer, Token *token) {
 
 		switch (buffer->data[buffer->index]) {
 			case ':':
-				printf("helre\n");
 				if (content.index == 0) {
 					writeToToken(token, _OPERATOR, 1, ":");
 					buffer->index++;
@@ -127,7 +102,7 @@ int getNextToken(FILE *file, Buffer *buffer, Token *token) {
 					buffer->index++;
 					if (buffer->index >= (buffer->size - 1)) {
 						buffer->data = (char*) malloc(buffer->size * sizeof(char));
-						if (readFileToBuffer(file, buffer) == 10) {
+						if (readFileToBuffer(file, buffer) == -10) {
 							writeToToken(token, _OPERATOR, 1, "=");
 							return 0;
 						}
