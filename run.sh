@@ -45,7 +45,7 @@ do
 	if [ "$#" -gt 1 ] || [ "$#" -eq 1 ]; then
 		./build/alloy $1
 	else
-		(./build/alloy ./examples/aha.al)
+		(./build/alloy ./examples/doteq.al)
 	fi
 	if [ "$?" -ne 0 ]; then
 		errorCount=$((errorCount + 1))

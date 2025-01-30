@@ -31,6 +31,34 @@ int readFileToBuffer(FILE *file, Buffer *buffer) {
 	return 0;
 }
 
+int makeTokenToDiff(FILE *file, Token *token, Buffer *buffer, char *template) {
+	int i = 0;
+	for (i = 0; template[i] != '\0'; i++) {
+		if (buffer->index >= (buffer->size - 2)) {
+			if (readFileToBuffer(file, buffer) == -10) {
+				writeToToken(token, _EOF, 1, '\0');
+				return -10;
+			}
+		}
+
+		if (buffer->data[buffer->index] == template[i] && buffer->data[buffer->index] != '\n') {
+			buffer->index++;
+			continue;
+		} else {
+			int result = writeToToken(token, _OPERATOR, i, template);
+			if (result != 0) { return result; }
+			return 0;
+		}
+	}
+	int result = writeToToken(token, _OPERATOR, i, template);
+	if (result != 0) { return result; }
+	return 0;
+}
+
+int makeTokenIfequal(FILE *file, Token *token, Buffer *buffer, char *template) {
+	return 0;
+}
+
 int getNextToken(FILE *file, Buffer *buffer, Token *token) {
 	if (file == NULL) { return 1; }
 	if (buffer == NULL) { return 2; }
@@ -99,33 +127,46 @@ int getNextToken(FILE *file, Buffer *buffer, Token *token) {
 				break;
 			case '=':
 				if (content.index == 0) {
-					buffer->index++;
-					if (buffer->index >= (buffer->size - 1)) {
-						buffer->data = (char*) malloc(buffer->size * sizeof(char));
-						if (readFileToBuffer(file, buffer) == -10) {
-							writeToToken(token, _OPERATOR, 1, "=");
-							return 0;
-						}
-					}
-					if (buffer->data[buffer->index] == '=') {
-						writeToToken(token, _OPERATOR, 2, "==");
-						buffer->index++;
-						return 0;
-					} else {
-						writeToToken(token, _OPERATOR, 1, "=");
-						return 0;
-					}
+					makeTokenToDiff(file, token, buffer, "==\n");
+					return 0;
 				} else {
 					writeToToken(token, _IDENTIFIER, content.index, content.data);
 					return 0;
 				}
 				break;
+			case '-':
+				if (content.index == 0) {
+					makeTokenToDiff(file, token, buffer, "---\n");
+				} else {
+					writeToToken(token, _IDENTIFIER, content.index, content.data);
+					return 0;
+				}
+				return 0;
+				break;
+			case '.':
+				if (content.index == 0) {
+					writeToToken(token, _OPERATOR, 1, ".");
+					buffer->index++;
+					return 0;
+				} else {
+					writeToToken(token, _IDENTIFIER, content.index, content.data);
+					return 0;
+				}
+				break;
+			case ',':
+				if (content.index == 0) {
+					writeToToken(token, _OPERATOR, 1, ",");
+					buffer->index++;
+					return 0;
+				} else {
+					writeToToken(token, _IDENTIFIER, content.index, content.data);
+					return 0;
+				}
 			default:
 				content.data[content.index] = buffer->data[buffer->index];
 				content.index++;
 				buffer->index++;
 		}
-
 	}
 	buffer->index++;
 	return 0;

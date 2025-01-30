@@ -39,7 +39,7 @@ int main(int argc, char *argv[]) {
 	}
 
 	ExecTree *execTree = (ExecTree*) malloc(sizeof(ExecTree));
-	if(parseSourceFile(file, execTree, 3) != 0) {
+	if(parseSourceFile(file, execTree, 64) != 0) {
 		goto EXIT_FILE;
 	}
 

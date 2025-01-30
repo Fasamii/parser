@@ -1,0 +1,1 @@
+#define GET_ERROR_NOT_ENOUGH_ARGS()
