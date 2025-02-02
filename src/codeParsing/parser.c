@@ -5,6 +5,23 @@
 #include "./execTree.h"
 #include "./lexer.h"
 
+void printToken(char *str) {
+	printf("\e[38;5;53m├> \e[0m");
+	for (int i = 0; str[i] != '\0'; i++) {
+		if (str[i] == '\t') {
+			printf("\e[38;5;5m[tab]\e[0m");
+			continue;
+		}
+		if (str[i] == '\n') {
+			printf("\e[38;5;5[\\n]\e[0m");
+			continue;
+		}
+		printf("%c", str[i]);
+	}
+	printf("\n");
+	return;
+}
+
 int parseSourceFile(FILE *file, ExecTree *execTree, int bufferSize) {
 	if (file == NULL) { return 1; }
 	if (execTree == NULL) { return 2; }
@@ -25,7 +42,7 @@ int parseSourceFile(FILE *file, ExecTree *execTree, int bufferSize) {
 		if (token->type == _EOF) {
 			break; 
 		}
-		printf("=>\e[38;5;44m%s\e[0m\n", token->content);
+		printToken(token->content);
 	}
 
 	treeRemoveNodeAndChilds(execTree);
